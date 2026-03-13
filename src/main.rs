@@ -108,13 +108,15 @@ fn main() -> ! {
 
     // Split GPIO bank — all pins are on GPIOB / CN7
     let gpiob = dp.GPIOB.split(ccdr.peripheral.GPIOB);
+    // PB13 is held by the Ethernet PHY, so we'll use PB5 instead for AIN2 — it's adjacent to PB9 (PWMA) and PB12 (STBY) on CN7
+    let gpioa = dp.GPIOA.split(ccdr.peripheral.GPIOA);
 
     // STBY: CN7 pin 7 — active-high enable
     let mut stby = gpiob.pb12.into_push_pull_output();
 
     // AIN1 (CN7 pin 3) / AIN2 (CN7 pin 6) — PB13 is RMII_TXD1, driven by on-board Ethernet PHY
     let ain1 = gpiob.pb15.into_push_pull_output();
-    let ain2 = gpiob.pb5.into_push_pull_output();
+    let ain2 = gpioa.pa15.into_push_pull_output();
 
     // PWMA: PB9 (CN7 pin 4) → TIM4_CH4 (AF2), 20 kHz
     let pwm_pin = gpiob.pb9.into_alternate::<2>();
