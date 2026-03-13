@@ -1,0 +1,9 @@
+[build]
+target = "thumbv7em-none-eabihf"
+
+[target.thumbv7em-none-eabihf]
+rustflags = [
+    "-C", "link-arg=-Tlink.x",
+]
+# Requires probe-rs: `cargo install probe-rs-tools`
+runner = "probe-rs run --chip STM32H753ZITx"
