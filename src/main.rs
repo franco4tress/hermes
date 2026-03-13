@@ -8,7 +8,7 @@
 //!  ────────┼─────────┼───────────┼────────────────────────────────
 //!  PB9     │  pin 4  │ PWMA      │ TIM4_CH4 (AF2), 20 kHz PWM
 //!  PB15    │  pin 3  │ AIN1      │ Direction bit 1
-//!  PB11    │  pin 6  │ AIN2      │ Direction bit 2  (PB13 is RMII_TXD1, held by Ethernet PHY)
+//!  PA15    │  pin 9  │ AIN2      │ Direction bit 2
 //!  PB12    │  pin 7  │ STBY      │ Active-high enable
 //!  GND     │  pin 8  │ GND / VM- │ Adjacent to STBY pin
 //!  +12 V   │ external│ VM        │ Motor supply (up to 15 V)
@@ -145,7 +145,7 @@ fn main() -> ! {
         delay.delay_ms(500u32);
 
         rprintln!("Reverse 50 % for 2 s");
-        motor.reverse(50);
+        motor.reverse(30);
         delay.delay_ms(2_000u32);
 
         rprintln!("Short brake for 500 ms");

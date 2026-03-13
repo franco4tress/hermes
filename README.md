@@ -5,19 +5,19 @@ Summary
 - Uses `stm32h7xx-hal` and `embedded-hal` (0.2) — built for `thumbv7em-none-eabihf`.
 
 Pin mapping (current firmware)
-- PWMA (PWM speed): PB9 (CN7)
-- AIN1 (direction): PB15 (CN7)
-- AIN2 (direction): PB13 (CN7)
-- STBY (enable):    PB12 (CN7)
-- TB6612 VCC:        NUCLEO 3.3 V
-- TB6612 GND:        NUCLEO GND and Battery negative (common ground)
-- TB6612 VM:         Battery +12 V (motor supply)
+- PWMA (PWM speed):     PB9 (CN7)
+- AIN1 (direction):     PB15 (CN7)
+- AIN2 (direction):     PA15 (CN7)
+- STBY (enable):        PB12 (CN7)
+- TB6612 VCC:           NUCLEO 3.3 V
+- TB6612 GND:           NUCLEO GND and Battery negative (common ground)
+- TB6612 VM:            Battery +12 V (motor supply)
 
 Wiring notes
 - Connect TB6612 GND to BOTH the NUCLEO GND and the battery negative (B−). This common ground is required for logic signals to be referenced correctly.
 - VCC on TB6612 must be 3.3 V from the NUCLEO (not battery +12 V).
 - STBY must be pulled HIGH (firmware drives `PB12` high) to enable outputs.
-- Use the Morpho `CN7` cluster (PB9/PB15/PB13/PB12) for compact wiring as shown above.
+- Use the Morpho `CN7` cluster (PB9/PB15/PA15/PB12) for compact wiring as shown above.
 
 Build & flash
 - Ensure target and runner are set in `.cargo/config.toml` (probe-rs runner configured).
