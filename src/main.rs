@@ -51,18 +51,45 @@ fn main() -> ! {
     // STBY: CN7 pin 7 — active-high enable
     let mut stby = gpiob.pb12.into_push_pull_output();
 
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    //                             Right Motors configuration
+    ///////////////////////////////////////////////////////////////////////////////////////////
+
     // AIN1 (CN7 pin 3) / AIN2 (CN7 pin 6) — PB13 is RMII_TXD1, driven by on-board Ethernet PHY
     let ain1 = gpiob.pb15.into_push_pull_output();
     let ain2 = gpioa.pa15.into_push_pull_output();
 
     // PWMA: PB9 (CN7 pin 4) → TIM4_CH4 (AF2), 20 kHz
-    let pwm_pin = gpiob.pb9.into_alternate::<2>();
-    let pwm = dp
-        .TIM4
-        .pwm(pwm_pin, 20.kHz(), ccdr.peripheral.TIM4, &ccdr.clocks);
+    let pwma_pin = gpiob.pb9.into_alternate::<2>();
+
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    //                             Left Motors configuration
+    ///////////////////////////////////////////////////////////////////////////////////////////
+
+    // BIN1 (CN7 pin 13) / BIN2 (CN7 pin 19)
+    let bin1 = gpiob.pb5.into_push_pull_output();
+    let bin2 = gpiob.pb4.into_push_pull_output();
+
+    // PWMB: PB8 (CN7 pin 14) → TIM4_CH3 (AF2), 20 kHz
+    let pwmb_pin = gpiob.pb8.into_alternate::<2>();
+
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    // Build PWM channels
+    ////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Configure BOTH channels in one call — pass a tuple of pins
+    let (pwmb, pwma) = dp.TIM4.pwm(
+        (pwmb_pin, pwma_pin),
+        20.kHz(),
+        ccdr.peripheral.TIM4,
+        &ccdr.clocks,
+    );
 
     // Build motor driver (also calls pwm.enable() internally)
-    let mut motor = Motor::new(ain1, ain2, pwm);
+    let mut right_motor = Motor::new(ain1, ain2, pwma);
+    let mut left_motor = Motor::new(bin1, bin2, pwmb);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////
 
     // SysTick delay — must come after the last &ccdr.clocks borrow above
     let mut delay = cp.SYST.delay(ccdr.clocks);
@@ -74,19 +101,19 @@ fn main() -> ! {
     rtt_init_print!();
     loop {
         rprintln!("Forward 50 % for 2 s");
-        motor.forward(50);
+        right_motor.forward(50);
         delay.delay_ms(2_000u32);
 
         rprintln!("Short brake for 500 ms");
-        motor.brake();
+        right_motor.brake();
         delay.delay_ms(500u32);
 
         rprintln!("Reverse 30 % for 2 s");
-        motor.reverse(30);
+        right_motor.reverse(30);
         delay.delay_ms(2_000u32);
 
         rprintln!("Short brake for 500 ms");
-        motor.brake();
+        right_motor.brake();
         delay.delay_ms(500u32);
     }
 }
