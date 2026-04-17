@@ -86,8 +86,8 @@ fn main() -> ! {
     );
 
     // Build motor driver (also calls pwm.enable() internally)
-    let mut right_motor = Motor::new(ain1, ain2, pwma);
-    let mut left_motor = Motor::new(bin1, bin2, pwmb);
+    let mut right_motor = Motor::new(ain1, ain2, pwma, motor_driver::Polarity::Forward);
+    let mut left_motor = Motor::new(bin1, bin2, pwmb, motor_driver::Polarity::Forward);
 
     ////////////////////////////////////////////////////////////////////////////////////////////
 
