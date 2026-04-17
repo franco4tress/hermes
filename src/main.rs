@@ -86,8 +86,8 @@ fn main() -> ! {
     );
 
     // Build motor driver (also calls pwm.enable() internally)
-    let mut right_motor = Motor::new(ain1, ain2, pwma, motor_driver::Polarity::Forward);
-    let mut left_motor = Motor::new(bin1, bin2, pwmb, motor_driver::Polarity::Forward);
+    let mut right_motor = Motor::new(ain1, ain2, pwma, motor_driver::Polarity::Forward, 0.0);
+    let mut left_motor = Motor::new(bin1, bin2, pwmb, motor_driver::Polarity::Forward, 0.0);
 
     ////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -114,6 +114,16 @@ fn main() -> ! {
 
         rprintln!("Short brake for 500 ms");
         right_motor.brake();
+        delay.delay_ms(500u32);
+
+        rprintln!("Slowly accelerate forward to 100 % over 5 s");
+        right_motor.set_polarity(motor_driver::Polarity::Forward);
+        let mut progression = [(0.0, 0.0); 50];
+        right_motor.smooth_drive(100.0, 5.0, &mut progression, &mut delay);
+        
+        rprintln!("Slowly decelerate to stop over 5 s");
+        right_motor.smooth_drive(0.0, 5.0, &mut progression, &mut delay);
+
         delay.delay_ms(500u32);
     }
 }
