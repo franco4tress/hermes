@@ -102,27 +102,37 @@ fn main() -> ! {
     loop {
         rprintln!("Forward 50 % for 2 s");
         right_motor.forward(50);
+        left_motor.forward(50);
         delay.delay_ms(2_000u32);
 
         rprintln!("Short brake for 500 ms");
         right_motor.brake();
+        left_motor.brake();
         delay.delay_ms(500u32);
 
         rprintln!("Reverse 30 % for 2 s");
         right_motor.reverse(30);
+        left_motor.reverse(30);
         delay.delay_ms(2_000u32);
 
         rprintln!("Short brake for 500 ms");
         right_motor.brake();
+        left_motor.brake();
         delay.delay_ms(500u32);
+
+        let mut progression = [(0.0, 0.0); 50];
 
         rprintln!("Slowly accelerate forward to 100 % over 5 s");
         right_motor.set_polarity(motor_driver::Polarity::Forward);
-        let mut progression = [(0.0, 0.0); 50];
+        left_motor.set_polarity(motor_driver::Polarity::Forward);
+
+        rprintln!("Slowly accelerate forward to 100 % over 5 s");
         right_motor.smooth_drive(100.0, 5.0, &mut progression, &mut delay);
-        
+        left_motor.smooth_drive(100.0, 5.0, &mut progression, &mut delay);
+
         rprintln!("Slowly decelerate to stop over 5 s");
         right_motor.smooth_drive(0.0, 5.0, &mut progression, &mut delay);
+        left_motor.smooth_drive(0.0, 5.0, &mut progression, &mut delay);
 
         delay.delay_ms(500u32);
     }
