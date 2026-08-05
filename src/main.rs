@@ -22,7 +22,7 @@ mod motor_driver;
 use cortex_m_rt::entry;
 use panic_halt as _;
 use rtt_target::{rprintln, rtt_init_print};
-use stm32h7xx_hal::{pac, prelude::*};
+use stm32h7xx_hal::{pac, prelude::*, pwm};
 
 use crate::motor_driver::Motor;
 
@@ -43,51 +43,80 @@ fn main() -> ! {
     let rcc = dp.RCC.constrain();
     let ccdr = rcc.sys_ck(400.MHz()).freeze(pwrcfg, &dp.SYSCFG);
 
-    // Split GPIO bank — all pins are on GPIOB / CN7
+    // Split GPIO bank — all left motor pins are on GPIOB / CN7
     let gpiob = dp.GPIOB.split(ccdr.peripheral.GPIOB);
     // PB13 is held by the Ethernet PHY, so we'll use PB5 instead for AIN2 — it's adjacent to PB9 (PWMA) and PB12 (STBY) on CN7
     let gpioa = dp.GPIOA.split(ccdr.peripheral.GPIOA);
+    
+    // All right motor pins are on GPIOE / CN9 and GPIOD / CN10
+    let gpioe = dp.GPIOE.split(ccdr.peripheral.GPIOE);
+    let gpiod = dp.GPIOD.split(ccdr.peripheral.GPIOD);
 
     // STBY: CN7 pin 7 — active-high enable
-    let mut stby = gpiob.pb12.into_push_pull_output();
+    let mut stby_left = gpiob.pb12.into_push_pull_output();
 
     ///////////////////////////////////////////////////////////////////////////////////////////
-    //                             Right Motors configuration
+    //                             Front Left Motor configuration
     ///////////////////////////////////////////////////////////////////////////////////////////
 
     // AIN1 (CN7 pin 3) / AIN2 (CN7 pin 6) — PB13 is RMII_TXD1, driven by on-board Ethernet PHY
-    let ain1 = gpiob.pb15.into_push_pull_output();
-    let ain2 = gpioa.pa15.into_push_pull_output();
+    let ain1_left = gpiob.pb15.into_push_pull_output();
+    let ain2_left = gpioa.pa15.into_push_pull_output();
 
     // PWMA: PB9 (CN7 pin 4) → TIM4_CH4 (AF2), 20 kHz
-    let pwma_pin = gpiob.pb9.into_alternate::<2>();
+    let pwma_pin_left = gpiob.pb9.into_alternate::<2>();
 
     ///////////////////////////////////////////////////////////////////////////////////////////
-    //                             Left Motors configuration
+    //                             Back Left Motor configuration
     ///////////////////////////////////////////////////////////////////////////////////////////
 
     // BIN1 (CN7 pin 13) / BIN2 (CN7 pin 19)
-    let bin1 = gpiob.pb5.into_push_pull_output();
-    let bin2 = gpiob.pb4.into_push_pull_output();
+    let bin1_left = gpiob.pb4.into_push_pull_output();
+    let bin2_left = gpiob.pb5.into_push_pull_output();
 
     // PWMB: PB8 (CN7 pin 14) → TIM4_CH3 (AF2), 20 kHz
-    let pwmb_pin = gpiob.pb8.into_alternate::<2>();
+    let pwmb_pin_left = gpiob.pb8.into_alternate::<2>();
+
+
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    //                            Front Right Motor configuration
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    
+    let ain1_right = gpioe.pe6.into_push_pull_output();
+    let ain2_right = gpioe.pe3.into_push_pull_output();
+
+    let pwma_pin_right = gpiod.pd12.into_alternate::<2>();
+
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    //                            Back Right Motor configuration
+    /////////////////////////////////////////////////////////////////////////////////////////////
+     
+    let bin1_right = gpioe.pe4.into_push_pull_output();
+    let bin2_right = gpioe.pe2.into_push_pull_output();
+
+    let pwmb_pin_right = gpiod.pd13.into_alternate::<2>();
+
+
+    let mut stby_right = gpioe.pe5.into_push_pull_output();
 
     ////////////////////////////////////////////////////////////////////////////////////////////
     // Build PWM channels
     ////////////////////////////////////////////////////////////////////////////////////////////
 
-    // Configure BOTH channels in one call — pass a tuple of pins
-    let (pwmb, pwma) = dp.TIM4.pwm(
-        (pwmb_pin, pwma_pin),
+    // Configure ALL channels in one call — pass a tuple of pins
+    let (pwmb_left, pwma_left, pwmb_right, pwma_right) = dp.TIM4.pwm(
+        (pwmb_pin_left, pwma_pin_left, pwmb_pin_right, pwma_pin_right),
         20.kHz(),
         ccdr.peripheral.TIM4,
         &ccdr.clocks,
     );
 
     // Build motor driver (also calls pwm.enable() internally)
-    let mut right_motor = Motor::new(ain1, ain2, pwma, motor_driver::Polarity::Forward, 0.0);
-    let mut left_motor = Motor::new(bin1, bin2, pwmb, motor_driver::Polarity::Forward, 0.0);
+    let mut front_left_motor = Motor::new(ain1_left, ain2_left, pwma_left, motor_driver::Polarity::Forward, 0.0);
+    let mut back_left_motor = Motor::new(bin1_left, bin2_left, pwmb_left, motor_driver::Polarity::Forward, 0.0);
+    // Reverse the right motors to make the robot drive forward (installation is mirrored)
+    let mut front_right_motor = Motor::new(ain1_right, ain2_right, pwma_right, motor_driver::Polarity::Reverse, 0.0);
+    let mut back_right_motor = Motor::new(bin1_right, bin2_right, pwmb_right, motor_driver::Polarity::Reverse, 0.0);
 
     ////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -95,44 +124,68 @@ fn main() -> ! {
     let mut delay = cp.SYST.delay(ccdr.clocks);
 
     // Bring TB6612FNG out of standby
-    stby.set_high();
+    stby_left.set_high();
+    stby_right.set_high();
     delay.delay_ms(1u32);
 
     rtt_init_print!();
     loop {
+        front_right_motor.set_polarity(motor_driver::Polarity::Reverse);
+        back_right_motor.set_polarity(motor_driver::Polarity::Reverse);
         rprintln!("Forward 50 % for 2 s");
-        right_motor.forward(50);
-        left_motor.forward(50);
+        front_left_motor.set_polarity(motor_driver::Polarity::Forward);
+        back_left_motor.set_polarity(motor_driver::Polarity::Forward);
+        front_right_motor.set_polarity(motor_driver::Polarity::Reverse);
+        back_right_motor.set_polarity(motor_driver::Polarity::Reverse);
+        front_left_motor.drive(50);
+        back_left_motor.drive(50);
+        front_right_motor.drive(50);
+        back_right_motor.drive(50);
         delay.delay_ms(2_000u32);
 
         rprintln!("Short brake for 500 ms");
-        right_motor.brake();
-        left_motor.brake();
+        front_left_motor.brake();
+        back_left_motor.brake();
+        front_right_motor.brake();
+        back_right_motor.brake();
         delay.delay_ms(500u32);
 
         rprintln!("Reverse 30 % for 2 s");
-        right_motor.reverse(30);
-        left_motor.reverse(30);
+        front_left_motor.set_polarity(motor_driver::Polarity::Reverse);
+        back_left_motor.set_polarity(motor_driver::Polarity::Reverse);
+        front_right_motor.set_polarity(motor_driver::Polarity::Forward);
+        back_right_motor.set_polarity(motor_driver::Polarity::Forward);
+        front_left_motor.drive(30);
+        back_left_motor.drive(30);
+        front_right_motor.drive(30);
+        back_right_motor.drive(30);
         delay.delay_ms(2_000u32);
 
         rprintln!("Short brake for 500 ms");
-        right_motor.brake();
-        left_motor.brake();
+        front_left_motor.brake();
+        back_left_motor.brake();
+        front_right_motor.brake();
+        back_right_motor.brake();
         delay.delay_ms(500u32);
 
         let mut progression = [(0.0, 0.0); 50];
 
-        rprintln!("Slowly accelerate forward to 100 % over 5 s");
-        right_motor.set_polarity(motor_driver::Polarity::Forward);
-        left_motor.set_polarity(motor_driver::Polarity::Forward);
+        front_left_motor.set_polarity(motor_driver::Polarity::Forward);
+        back_left_motor.set_polarity(motor_driver::Polarity::Forward);
+        // Reverse the right motors to make the robot drive forward (installation is mirrored)
+        front_right_motor.set_polarity(motor_driver::Polarity::Reverse);
+        back_right_motor.set_polarity(motor_driver::Polarity::Reverse);
 
         rprintln!("Slowly accelerate forward to 100 % over 5 s");
-        right_motor.smooth_drive(100.0, 5.0, &mut progression, &mut delay);
-        left_motor.smooth_drive(100.0, 5.0, &mut progression, &mut delay);
-
+        front_left_motor.smooth_drive(100.0, 5.0, &mut progression, &mut delay);
+        back_left_motor.smooth_drive(100.0, 5.0, &mut progression, &mut delay);
+        front_right_motor.smooth_drive(100.0, 5.0, &mut progression, &mut delay);
+        back_right_motor.smooth_drive(100.0, 5.0, &mut progression, &mut delay);
         rprintln!("Slowly decelerate to stop over 5 s");
-        right_motor.smooth_drive(0.0, 5.0, &mut progression, &mut delay);
-        left_motor.smooth_drive(0.0, 5.0, &mut progression, &mut delay);
+        front_left_motor.smooth_drive(0.0, 5.0, &mut progression, &mut delay);
+        back_left_motor.smooth_drive(0.0, 5.0, &mut progression, &mut delay);
+        front_right_motor.smooth_drive(0.0, 5.0, &mut progression, &mut delay);
+        back_right_motor.smooth_drive(0.0, 5.0, &mut progression, &mut delay);
 
         delay.delay_ms(500u32);
     }

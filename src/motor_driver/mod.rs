@@ -83,16 +83,6 @@ where
         self.throttle = speed_pct as f32;
     }
 
-    pub fn forward(&mut self, speed_pct: u8) {
-        self.set_polarity(Polarity::Forward);
-        self.drive(speed_pct);
-    }
-
-    pub fn reverse(&mut self, speed_pct: u8) {
-        self.set_polarity(Polarity::Reverse);
-        self.drive(speed_pct);
-    }
-
     /// Short-circuit brake: resist spinning, stop quickly.
     pub fn brake(&mut self) {
         self.set_polarity(Polarity::Brake);
