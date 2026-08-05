@@ -1,0 +1,4 @@
+(fp_lib_table
+	(version 7)
+	(lib (name "Nucleo_Recovery") (type "KiCad") (uri "${KIPRJMOD}/Stuff to fix this/Nucleo_Recovery.pretty") (options "") (descr ""))
+)

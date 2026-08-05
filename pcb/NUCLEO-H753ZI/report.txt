@@ -1,0 +1,23 @@
+Info: Processing symbol 'CN7:Nucleo_Recovery:CON_SAMTEC_SSW-110-23-X-D_N144_ARD'.
+Info: Processing symbol 'J16:Connector_PinHeader_2.00mm:PinHeader_1x06_P2.00mm_Horizontal'.
+Info: Processing symbol 'J15:Connector_PinHeader_2.00mm:PinHeader_1x06_P2.00mm_Horizontal'.
+Info: Processing symbol 'J14:Connector_PinSocket_2.00mm:PinSocket_1x08_P2.00mm_Vertical'.
+Info: Processing symbol 'J13:Connector_PinSocket_2.00mm:PinSocket_1x08_P2.00mm_Vertical'.
+Info: Processing symbol 'J12:Connector_PinSocket_2.00mm:PinSocket_1x08_P2.00mm_Vertical'.
+Info: Processing symbol 'J11:Connector_PinSocket_2.00mm:PinSocket_1x08_P2.00mm_Vertical'.
+Info: Processing symbol 'J10:Connector_PinHeader_2.00mm:PinHeader_1x06_P2.00mm_Horizontal'.
+Info: Processing symbol 'J9:Connector_PinHeader_2.00mm:PinHeader_1x06_P2.00mm_Horizontal'.
+Info: Processing symbol 'CN10:Nucleo_Recovery:CON_SAMTEC_SSW-117-23-X-D_N144_ARD'.
+Info: Processing symbol 'CN9:Nucleo_Recovery:CON_SAMTEC_SSW-115-23-X-D_N144_ARD'.
+Info: Processing symbol 'CN8:Nucleo_Recovery:CON_SAMTEC_SSW-108-23-X-D_N144_ARD'.
+Info: Processing symbol 'BT2:TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal'.
+Reconnect CN10 pin 5 from unconnected-(CN10-Pin_5-Pad5) to GND_1.
+Add net GND_2.
+Reconnect CN10 pin 27 from unconnected-(CN10-Pin_27-Pad27) to GND_2.
+Reconnect CN10 pin 3 from unconnected-(CN10-Pin_3-Pad3) to GND.
+Reconnect CN9 pin 12 from unconnected-(CN9-Pin_12-Pad12) to GND_1.
+Add net GND_1.
+Reconnect CN9 pin 23 from unconnected-(CN9-Pin_23-Pad23) to GND.
+
+
+Info: Total warnings: 0, errors: 0.

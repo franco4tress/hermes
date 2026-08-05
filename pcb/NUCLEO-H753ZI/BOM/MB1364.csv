@@ -1,0 +1,11 @@
+"Id";"Designator";"Footprint";"Quantity";"Designation";"Supplier and ref";
+1;"BT2";"TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal";1;"Battery";;;
+2;"CN7";"CON_SAMTEC_SSW-110-23-X-D_N144_ARD";1;"Socket 10x2_N144_ARD";;;
+3;"CN8";"CON_SAMTEC_SSW-108-23-X-D_N144_ARD";1;"Socket 8x2_N144_ARD";;;
+4;"CN9";"CON_SAMTEC_SSW-115-23-X-D_N144_ARD";1;"Socket 15x2_N144_ARD";;;
+5;"CN10";"CON_SAMTEC_SSW-117-23-X-D_N144_ARD";1;"Socket 17x2_N144_ARD";;;
+6;"J9";"PinHeader_1x06_P2.00mm_Horizontal";1;"Left-Front Motor connector";;;
+7;"J10";"PinHeader_1x06_P2.00mm_Horizontal";1;"Left-Back Motor connector";;;
+8;"J11, J12, J13, J14";"PinSocket_1x08_P2.00mm_Vertical";4;"Conn_01x08";;;
+9;"J15";"PinHeader_1x06_P2.00mm_Horizontal";1;"Right-Front Motor connector";;;
+10;"J16";"PinHeader_1x06_P2.00mm_Horizontal";1;"Right-Back Motor connector";;;
